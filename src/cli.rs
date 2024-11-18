@@ -14,8 +14,19 @@ pub enum Action {
         #[structopt()]
         position: usize
     },
-    /// List all tasks in the journal file
+    /// List incompleted tasks in the journal file
     List,
+    /// Modify an existing entry using its position
+    Edit {
+        /// The position of the task to edit.
+        #[structopt()]
+        position: usize,
+        /// The new text to replace the old text.
+        #[structopt()]
+        text: String
+    },
+    /// List completed tasks in the journal file
+    ListCompleted,
 }
 
 #[derive(Debug, StructOpt)]

@@ -31,6 +31,8 @@ fn main() -> anyhow::Result<()> {
         Add { text } => tasks::add_task(journal_file, Task::new(text)),
         Done { position } => tasks::complete_task(journal_file, position),
         List => tasks::list_tasks(journal_file),
+        Edit { position, text } => tasks::edit_task(journal_file, position, text),
+        ListCompleted => tasks::list_completed_tasks(journal_file),
     }?;
     Ok(())
 }
