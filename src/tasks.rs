@@ -56,7 +56,8 @@ impl Display for Task {
             .completed_at
             .map(|c| c.with_timezone(&Local).format("%F %H:%M:%S").to_string());
         let text_width = UnicodeWidthStr::width(self.text.as_str());
-        let padding = if text_width < 80 { 80 - text_width } else { 0 };
+        let len = 79;
+        let padding = if text_width < len { len - text_width } else { 0 };
 
         let padded_text = format!("{}{}", self.text, " ".repeat(padding));
         match complete_at {
