@@ -100,12 +100,14 @@ pub fn add_task(journal_path: PathBuf, task: Task) -> Result<()> {
         .read(true)
         .write(true)
         .create(true)
-        .open(journal_path)?;
+        .open(journal_path.clone())?;
 
     let mut tasks = collect_task(&file)?;
     tasks.push(task);
     serde_json::to_writer(file, &tasks)?;
 
+    // 添加任务后显示任务列表
+    list_tasks(journal_path)?;
     Ok(())
 }
 
@@ -113,7 +115,7 @@ pub fn complete_task(journal_path: PathBuf, task_position: usize) -> Result<()> 
     let file = OpenOptions::new()
         .read(true)
         .write(true)
-        .open(journal_path)?;
+        .open(journal_path.clone())?;
     let mut tasks = collect_task(&file)?;
     let mut incomplete_tasks: Vec<_> = tasks
         .iter_mut()
@@ -125,11 +127,26 @@ pub fn complete_task(journal_path: PathBuf, task_position: usize) -> Result<()> 
             "invalid task position",
         ));
     }
-    incomplete_tasks[task_position - 1].completed_at = Some(Utc::now());
-
-    file.set_len(0)?;
-    serde_json::to_writer(file, &tasks)?;
-    Ok(())
+    
+    // 先显示要完成的任务信息
+    println!("Completing task: {}", incomplete_tasks[task_position - 1]);
+    println!("Are you sure? [y/N]");
+    
+    let mut input = String::new();
+    std::io::stdin().read_line(&mut input)?;
+    
+    if input.trim().to_lowercase() == "y" {
+        incomplete_tasks[task_position - 1].completed_at = Some(Utc::now());
+        file.set_len(0)?;
+        serde_json::to_writer(file, &tasks)?;
+        
+        // 完成任务后显示任务列表
+        list_tasks(journal_path)?;
+        Ok(())
+    } else {
+        println!("Task completion cancelled");
+        Ok(())
+    }
 }
 
 pub fn list_tasks(journal_path: PathBuf) -> Result<()> {
